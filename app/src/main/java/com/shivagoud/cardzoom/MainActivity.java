@@ -11,8 +11,10 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -43,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.zoomable_card, parent, false);
+                view.setScaleX(mScale);
+                view.setScaleY(mScale);
+                view.invalidate();
                 return new ZoomableCardViewHolder(view);
             }
 
@@ -61,11 +66,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final ScaleGestureDetector mScaleDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.OnScaleGestureListener() {
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+            }
+            @Override
+            public boolean onScaleBegin(ScaleGestureDetector detector) {
+                return true;
+            }
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                Log.d("Scale_On_Pinch", "zoom ongoing, scale: " + detector.getScaleFactor());
+
+                mScale *= detector.getScaleFactor();
+
+                // Don't let the object get too small or too large.
+                mScale = Math.max(0.2f, Math.min(mScale, 1.2f));
+
+                zoomTiles(mScale);
+                return true;
+
+
+            }
+        });
+
         cardsView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                mScale = mScale==1?1.2f:1;
-                zoomTiles(mScale);
+                mScaleDetector.onTouchEvent(event);
                 return false;
             }
         });
@@ -76,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         for(int i=0;i<n;i++){
             View v = cardsView.getLayoutManager().getChildAt(i);
             v.setScaleX(scale);
-            v.setScaleX(scale);
+            v.setScaleY(scale);
             v.invalidate();
         }
     }
