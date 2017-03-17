@@ -12,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -23,6 +24,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     List<ResolveInfo> appsList;
+    RecyclerView cardsView;
+    float mScale = 1f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         appsList = getPackageManager().queryIntentActivities( mainIntent, 0);
 
-        RecyclerView cardsView = (RecyclerView)findViewById(R.id.cardsView);
+        cardsView = (RecyclerView)findViewById(R.id.cardsView);
         cardsView.setLayoutManager(new StaggeredGridLayoutManager(4, OrientationHelper.VERTICAL));
 
         cardsView.setAdapter(new RecyclerView.Adapter() {
@@ -50,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
                 CharSequence name =appsList.get(position).loadLabel(getPackageManager());
                 h.icon.setImageDrawable(icon);
                 h.title.setText(name);
-
             }
 
             @Override
@@ -58,6 +60,25 @@ public class MainActivity extends AppCompatActivity {
                 return appsList.size();
             }
         });
+
+        cardsView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mScale = mScale==1?1.2f:1;
+                zoomTiles(mScale);
+                return false;
+            }
+        });
+    }
+
+    void zoomTiles(float scale){
+        int n = cardsView.getLayoutManager().getChildCount();
+        for(int i=0;i<n;i++){
+            View v = cardsView.getLayoutManager().getChildAt(i);
+            v.setScaleX(scale);
+            v.setScaleX(scale);
+            v.invalidate();
+        }
     }
 
     private class ZoomableCardViewHolder extends RecyclerView.ViewHolder {
