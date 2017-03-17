@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     List<ResolveInfo> appsList;
     RecyclerView cardsView;
     float mScale = 1f;
+    float maxElevation = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +115,13 @@ public class MainActivity extends AppCompatActivity {
         TextView title;
         public ZoomableCardViewHolder(View view) {
             super(view);
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    maxElevation+=1;
+                    v.setElevation(maxElevation);
+                }
+            });
             icon = (ImageView)view.findViewById(R.id.iconView);
             title = (TextView)view.findViewById(R.id.titleView);
         }
